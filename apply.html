@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>預約體驗 — 實威國際 3D 掃描與列印</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12161C;
+    --ink-soft:#5A6472;
+    --line:#D8DCE2;
+    --paper:#F4F5F7;
+    --white:#FFFFFF;
+    --blue:#0B3A66;
+    --amber:#E8A33D;
+    --amber-deep:#8A5A08;
+    --err:#B3261E;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Noto Sans TC","Archivo",system-ui,sans-serif;
+    font-weight:400; line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .shell{max-width:1080px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- 標頭 ---------- */
+  .masthead{
+    background:var(--blue); color:#fff;
+    padding:14px 0;
+  }
+  .masthead .shell{display:flex; align-items:center; justify-content:space-between;}
+  .wordmark{
+    font-family:"Archivo",sans-serif; font-weight:700;
+    letter-spacing:.16em; font-size:13px;
+  }
+  .masthead span{font-size:12px; color:#9CC2E4;}
+
+  /* ---------- 主視覺 ---------- */
+  .hero{
+    background:var(--blue);
+    color:#fff;
+    padding:64px 0 80px;
+    position:relative; overflow:hidden;
+  }
+  .hero::after{
+    content:""; position:absolute; right:-120px; top:-80px;
+    width:420px; height:420px; border-radius:50%;
+    background:radial-gradient(circle, rgba(232,163,61,.16) 0%, rgba(232,163,61,0) 70%);
+    pointer-events:none;
+  }
+  .hero .shell{position:relative; z-index:1; max-width:760px;}
+  .hero h1{
+    font-size:clamp(30px,5vw,46px); line-height:1.28; margin:0 0 20px;
+    font-weight:700; letter-spacing:.01em;
+  }
+  .hero h1 em{font-style:normal; color:var(--amber);}
+  .hero p{
+    font-size:16px; color:#C8DCF0; margin:0 0 32px; max-width:56ch;
+    font-weight:300;
+  }
+  .ticker{
+    display:flex; flex-wrap:wrap; gap:0;
+    border-top:1px solid rgba(255,255,255,.18);
+    padding-top:24px;
+  }
+  .ticker div{padding-right:44px;}
+  .ticker b{
+    display:block; font-family:"Archivo",sans-serif;
+    font-size:26px; font-weight:600; color:var(--amber); line-height:1.2;
+  }
+  .ticker small{font-size:12px; color:#9CC2E4; font-weight:300;}
+
+  /* ---------- 主體 ---------- */
+  .body{padding:56px 0 80px;}
+  .grid{display:grid; grid-template-columns:1fr 380px; gap:48px; align-items:start;}
+
+  /* 表單 */
+  .form-card{
+    background:var(--white); border:1px solid var(--line);
+    padding:40px;
+  }
+  .form-card h2{
+    font-size:21px; margin:0 0 6px; font-weight:700; line-height:1.5;
+  }
+  .form-card > p.lede{
+    font-size:14px; color:var(--ink-soft); margin:0 0 32px; font-weight:300;
+  }
+
+  fieldset{border:0; margin:0 0 34px; padding:0;}
+  legend{
+    font-size:13px; font-weight:700; color:var(--blue);
+    padding:0 0 12px; margin-bottom:20px; width:100%;
+    border-bottom:2px solid var(--blue);
+  }
+
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .field{margin-bottom:18px;}
+  .field.full{grid-column:1 / -1;}
+  label{
+    display:block; font-size:13px; font-weight:500; margin-bottom:7px;
+  }
+  label .req{color:var(--err); margin-left:3px;}
+  input[type=text], input[type=email], input[type=tel], select, textarea{
+    width:100%; padding:11px 13px; font-size:14.5px;
+    font-family:inherit; color:var(--ink);
+    background:var(--white);
+    border:1px solid var(--line); border-radius:2px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  textarea{resize:vertical; min-height:96px; line-height:1.7;}
+  input:focus, select:focus, textarea:focus{
+    outline:none; border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(11,58,102,.12);
+  }
+  input.bad, select.bad{border-color:var(--err); background:#FDF6F5;}
+  .hint{font-size:12px; color:var(--ink-soft); margin-top:6px; font-weight:300;}
+  .err-msg{font-size:12px; color:var(--err); margin-top:6px; display:none;}
+  .err-msg.on{display:block;}
+
+  /* 興趣選擇 */
+  .picks{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .pick{position:relative;}
+  .pick input{position:absolute; opacity:0; width:0; height:0;}
+  .pick span{
+    display:block; padding:13px 15px; font-size:14px;
+    border:1px solid var(--line); background:var(--white);
+    cursor:pointer; transition:all .15s; line-height:1.5;
+  }
+  .pick span small{display:block; font-size:12px; color:var(--ink-soft); font-weight:300; margin-top:2px;}
+  .pick input:checked + span{
+    border-color:var(--blue); background:#F0F5FA;
+    box-shadow:inset 3px 0 0 var(--blue);
+  }
+  .pick input:focus-visible + span{box-shadow:0 0 0 3px rgba(11,58,102,.2);}
+
+  /* 送出 */
+  .submit-zone{border-top:1px solid var(--line); padding-top:26px;}
+  button.send{
+    width:100%; padding:16px; font-size:16px; font-weight:700;
+    font-family:inherit; color:#fff; background:var(--blue);
+    border:0; border-radius:2px; cursor:pointer;
+    transition:background .15s;
+  }
+  button.send:hover:not(:disabled){background:#0E4A82;}
+  button.send:disabled{background:#8E9AA8; cursor:not-allowed;}
+  button.send:focus-visible{outline:3px solid var(--amber); outline-offset:2px;}
+  .fineprint{font-size:12px; color:var(--ink-soft); margin:14px 0 0; font-weight:300; line-height:1.7;}
+
+  /* 側欄 */
+  aside .block{
+    background:var(--white); border:1px solid var(--line);
+    padding:26px; margin-bottom:18px;
+  }
+  aside h3{font-size:15px; margin:0 0 16px; font-weight:700;}
+  .steps{list-style:none; margin:0; padding:0; counter-reset:s;}
+  .steps li{
+    counter-increment:s; position:relative;
+    padding:0 0 18px 38px; font-size:13.5px; line-height:1.7;
+  }
+  .steps li::before{
+    content:counter(s); position:absolute; left:0; top:1px;
+    width:24px; height:24px; border-radius:50%;
+    background:var(--blue); color:#fff;
+    font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    font-family:"Archivo",sans-serif;
+  }
+  .steps li:last-child{padding-bottom:0;}
+  .steps li b{display:block; font-weight:500;}
+  .steps li span{color:var(--ink-soft); font-weight:300; font-size:12.5px;}
+
+  .contact p{margin:0 0 10px; font-size:13.5px; line-height:1.7;}
+  .contact p:last-child{margin:0;}
+  .contact a{color:var(--blue);}
+
+  /* 完成畫面 */
+  .done{display:none; background:var(--white); border:1px solid var(--line); padding:56px 40px; text-align:center;}
+  .done.on{display:block;}
+  .done .mark{
+    width:56px; height:56px; margin:0 auto 22px;
+    border-radius:50%; background:var(--blue); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+  }
+  .done h2{font-size:22px; margin:0 0 12px; font-weight:700;}
+  .done p{font-size:14.5px; color:var(--ink-soft); margin:0 auto 8px; max-width:44ch; font-weight:300; line-height:1.85;}
+  .ref{
+    display:inline-block; margin-top:20px; padding:9px 18px;
+    background:var(--paper); border:1px solid var(--line);
+    font-family:"Archivo",monospace; font-size:13px; letter-spacing:.06em;
+  }
+
+  /* 頁尾 */
+  footer{background:var(--ink); color:#8E9AA8; padding:32px 0; font-size:12.5px;}
+  footer .wordmark{color:#fff; margin-bottom:8px;}
+  footer p{margin:0 0 4px; font-weight:300;}
+
+  /* 提示列 */
+  .banner{
+    display:none; padding:13px 16px; margin-bottom:24px;
+    font-size:13.5px; border-left:3px solid var(--err);
+    background:#FDF6F5; color:var(--err); line-height:1.65;
+  }
+  .banner.on{display:block;}
+
+  @media (max-width:920px){
+    .grid{grid-template-columns:1fr; gap:32px;}
+    aside{order:-1;}
+    aside .block{padding:22px;}
+  }
+  @media (max-width:600px){
+    .shell{padding:0 18px;}
+    .hero{padding:44px 0 56px;}
+    .form-card{padding:26px 20px;}
+    .row, .picks{grid-template-columns:1fr;}
+    .ticker div{padding-right:28px;}
+    .ticker b{font-size:22px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important; scroll-behavior:auto !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="shell">
+    <div class="wordmark">實威國際 SOLIDWIZARD</div>
+    <span>3D 掃描 · 檢測 · 列印</span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="shell">
+    <h1>帶您的零件來，<br>當場看<em>數據說話</em></h1>
+    <p>一對一實機體驗，由應用工程師依您的產業與難題客製演示。填寫下方資料，我們會在三個工作日內與您聯繫安排時間。</p>
+    <div class="ticker">
+      <div><b>1:1</b><small>專屬工程師</small></div>
+      <div><b>3 天</b><small>內回覆</small></div>
+      <div><b>0 元</b><small>費用</small></div>
+      <div><b>當場</b><small>拿到成果</small></div>
+    </div>
+  </div>
+</header>
+
+<main class="body">
+  <div class="shell">
+    <div class="grid">
+
+      <div>
+        <div class="banner" id="banner"></div>
+
+        <section class="form-card" id="formCard">
+          <h2>預約表單</h2>
+          <p class="lede">標示 <span style="color:var(--err)">*</span> 的欄位為必填。</p>
+
+          <form id="applyForm" novalidate>
+
+            <fieldset>
+              <legend>聯絡資訊</legend>
+              <div class="row">
+                <div class="field">
+                  <label for="company">公司名稱<span class="req">*</span></label>
+                  <input type="text" id="company" name="company" autocomplete="organization" required>
+                  <div class="err-msg" data-for="company">請填寫公司名稱</div>
+                </div>
+                <div class="field">
+                  <label for="name">聯絡人姓名<span class="req">*</span></label>
+                  <input type="text" id="name" name="name" autocomplete="name" required>
+                  <div class="err-msg" data-for="name">請填寫姓名</div>
+                </div>
+                <div class="field">
+                  <label for="title">職稱</label>
+                  <input type="text" id="title" name="title" autocomplete="organization-title" placeholder="例：研發工程師">
+                </div>
+                <div class="field">
+                  <label for="phone">聯絡電話<span class="req">*</span></label>
+                  <input type="tel" id="phone" name="phone" autocomplete="tel" required>
+                  <div class="err-msg" data-for="phone">請填寫可聯繫的電話</div>
+                </div>
+                <div class="field full">
+                  <label for="email">電子信箱<span class="req">*</span></label>
+                  <input type="email" id="email" name="email" autocomplete="email" required>
+                  <div class="err-msg" data-for="email">請填寫正確的信箱格式</div>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>想體驗的設備</legend>
+              <div class="picks">
+                <label class="pick">
+                  <input type="checkbox" name="interest" value="SIMSCAN">
+                  <span>SIMSCAN<small>手持掃描 · 精密零件</small></span>
+                </label>
+                <label class="pick">
+                  <input type="checkbox" name="interest" value="NimbleTrack">
+                  <span>NimbleTrack<small>無線追蹤 · 大型工件</small></span>
+                </label>
+                <label class="pick">
+                  <input type="checkbox" name="interest" value="Geomagic Control X">
+                  <span>Geomagic Control X<small>檢測比對與報告</small></span>
+                </label>
+                <label class="pick">
+                  <input type="checkbox" name="interest" value="Formlabs 列印">
+                  <span>Formlabs 3D 列印<small>Form 4 / Fuse 系列</small></span>
+                </label>
+              </div>
+              <div class="err-msg" data-for="interest" style="margin-top:10px;">請至少選擇一項</div>
+            </fieldset>
+
+            <fieldset>
+              <legend>需求說明</legend>
+              <div class="field">
+                <label for="industry">產業別</label>
+                <select id="industry" name="industry">
+                  <option value="">請選擇</option>
+                  <option>模具</option>
+                  <option>汽機車與零組件</option>
+                  <option>航太與無人機</option>
+                  <option>電子與半導體</option>
+                  <option>機械設備</option>
+                  <option>醫療與牙科</option>
+                  <option>消費性產品設計</option>
+                  <option>學校與研究單位</option>
+                  <option>其他</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="need">目前遇到的難題</label>
+                <textarea id="need" name="need" placeholder="例：沖壓模具首件檢測要花三天，想知道掃描能不能縮短流程。"></textarea>
+                <p class="hint">寫得越具體，我們越能準備貼近您需求的展示內容與樣品。</p>
+              </div>
+              <div class="field">
+                <label for="bring">會帶零件或圖檔來嗎</label>
+                <select id="bring" name="bring">
+                  <option value="">請選擇</option>
+                  <option>會帶實體零件</option>
+                  <option>會提供 3D 圖檔</option>
+                  <option>兩者都有</option>
+                  <option>先看設備，暫時沒有</option>
+                </select>
+                <p class="hint">帶自己的件來，才看得出設備在您產線上實際的表現。</p>
+              </div>
+              <div class="field">
+                <label for="when">方便的時段</label>
+                <select id="when" name="when">
+                  <option value="">請選擇</option>
+                  <option>平日上午</option>
+                  <option>平日下午</option>
+                  <option>都可以，再與我聯繫討論</option>
+                </select>
+              </div>
+            </fieldset>
+
+            <div class="submit-zone">
+              <button type="submit" class="send" id="sendBtn">送出預約</button>
+              <p class="fineprint">送出後，專員將於三個工作日內與您聯繫確認時間與地點。您填寫的資料僅用於安排本次體驗與後續技術聯繫。</p>
+            </div>
+
+            <input type="text" name="website" id="hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true">
+          </form>
+        </section>
+
+        <section class="done" id="done">
+          <div class="mark">✓</div>
+          <h2>已收到您的預約</h2>
+          <p>專員會在三個工作日內與您聯繫，確認體驗時間與地點。</p>
+          <p>若有急件需求，歡迎直接來電 0800-868-358。</p>
+          <div class="ref" id="refCode"></div>
+        </section>
+      </div>
+
+      <aside>
+        <div class="block">
+          <h3>接下來會發生什麼</h3>
+          <ol class="steps">
+            <li><b>送出這份表單</b><span>約需兩分鐘</span></li>
+            <li><b>專員與您聯繫</b><span>三個工作日內，確認時間地點</span></li>
+            <li><b>現場實機操作</b><span>用您自己的零件或圖檔，親手試</span></li>
+            <li><b>帶走實際成果</b><span>檢測報告或列印件，可帶回公司討論</span></li>
+          </ol>
+        </div>
+        <div class="block contact">
+          <h3>想先聊聊再決定</h3>
+          <p>技術支援專線<br><a href="tel:0800868358">0800-868-358</a></p>
+          <p>台中辦公室<br>週一至週五 09:00–18:00</p>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="shell">
+    <div class="wordmark">實威國際 SOLIDWIZARD</div>
+    <p>3D 掃描 · 產品檢測 · 3D 列印</p>
+    <p>技術支援 0800-868-358</p>
+  </div>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ============================================================
+   ↓↓↓ 請換成你的 Firebase 專案設定 ↓↓↓
+   Firebase Console → 專案設定 → 一般 → 您的應用程式 → SDK 設定
+   ============================================================ */
+const firebaseConfig = {
+  apiKey:            "在這裡貼上 apiKey",
+  authDomain:        "在這裡貼上 authDomain",
+  projectId:         "在這裡貼上 projectId",
+  storageBucket:     "在這裡貼上 storageBucket",
+  messagingSenderId: "在這裡貼上 messagingSenderId",
+  appId:             "在這裡貼上 appId"
+};
+const COLLECTION = "demo_requests";   // Firestore 集合名稱
+/* ============================================================ */
+
+let db = null;
+try {
+  db = getFirestore(initializeApp(firebaseConfig));
+} catch (e) {
+  console.error("Firebase 初始化失敗", e);
+}
+
+const form   = document.getElementById("applyForm");
+const btn    = document.getElementById("sendBtn");
+const banner = document.getElementById("banner");
+const card   = document.getElementById("formCard");
+const done   = document.getElementById("done");
+
+const showErr = (key, on) => {
+  const msg = document.querySelector(`.err-msg[data-for="${key}"]`);
+  const fld = document.getElementById(key);
+  if (msg) msg.classList.toggle("on", on);
+  if (fld) fld.classList.toggle("bad", on);
+};
+
+["company","name","phone","email"].forEach(k => {
+  const el = document.getElementById(k);
+  el.addEventListener("input", () => showErr(k, false));
+});
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  banner.classList.remove("on");
+
+  // 蜜罐：機器人填了就直接假裝成功
+  if (document.getElementById("hp").value) {
+    card.style.display = "none"; done.classList.add("on"); return;
+  }
+
+  const val = k => document.getElementById(k).value.trim();
+  const interests = [...document.querySelectorAll('input[name=interest]:checked')].map(i => i.value);
+
+  let bad = false;
+  [["company", !val("company")],
+   ["name",    !val("name")],
+   ["phone",   !val("phone")],
+   ["email",   !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val("email"))]
+  ].forEach(([k, isBad]) => { showErr(k, isBad); if (isBad) bad = true; });
+
+  const noPick = interests.length === 0;
+  document.querySelector('.err-msg[data-for="interest"]').classList.toggle("on", noPick);
+  if (noPick) bad = true;
+
+  if (bad) {
+    banner.textContent = "還有欄位需要補上，請看下方紅字標示的位置。";
+    banner.classList.add("on");
+    document.querySelector(".bad, .err-msg.on")?.scrollIntoView({ block:"center" });
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "送出中…";
+
+  const payload = {
+    company:  val("company"),
+    name:     val("name"),
+    title:    val("title"),
+    phone:    val("phone"),
+    email:    val("email"),
+    interest: interests,
+    industry: document.getElementById("industry").value,
+    need:     val("need"),
+    bring:    document.getElementById("bring").value,
+    when:     document.getElementById("when").value,
+    status:   "new",
+    source:   "landing-apply",
+    createdAt: serverTimestamp()
+  };
+
+  try {
+    if (!db) throw new Error("Firestore 未初始化");
+    const ref = await addDoc(collection(db, COLLECTION), payload);
+    document.getElementById("refCode").textContent = "受理編號 " + ref.id.slice(0,8).toUpperCase();
+    card.style.display = "none";
+    done.classList.add("on");
+    window.scrollTo({ top:0, behavior:"smooth" });
+  } catch (err) {
+    console.error(err);
+    btn.disabled = false;
+    btn.textContent = "送出預約";
+    banner.textContent = "送出失敗，請稍後再試，或直接來電 0800-868-358 由專員為您登記。";
+    banner.classList.add("on");
+    banner.scrollIntoView({ block:"center" });
+  }
+});
+</script>
+
+</body>
+</html>
