@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>預約名單 — 實威國際</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12161C; --soft:#5A6472; --line:#D8DCE2;
+    --paper:#F4F5F7; --white:#fff; --blue:#0B3A66; --amber:#E8A33D;
+    --err:#B3261E; --ok:#1B7A4B;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.7;
+    -webkit-font-smoothing:antialiased;}
+
+  .bar{background:var(--blue);color:#fff;padding:13px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .bar b{font-family:"Archivo";letter-spacing:.14em;font-size:13px;font-weight:600;}
+  .bar .who{font-size:12px;color:#9CC2E4;display:flex;align-items:center;gap:12px;}
+  .bar button{background:none;border:1px solid rgba(255,255,255,.35);color:#fff;
+    padding:5px 12px;font-size:12px;border-radius:2px;cursor:pointer;font-family:inherit;}
+  .bar button:hover{background:rgba(255,255,255,.12);}
+
+  .wrap{max-width:1400px;margin:0 auto;padding:28px 24px 60px;}
+
+  /* 登入 */
+  .login{max-width:380px;margin:80px auto;background:#fff;border:1px solid var(--line);padding:36px;}
+  .login h1{font-size:19px;margin:0 0 6px;}
+  .login p.l{font-size:13px;color:var(--soft);margin:0 0 26px;font-weight:300;}
+  .login label{display:block;font-size:13px;font-weight:500;margin:0 0 6px;}
+  .login input{width:100%;padding:11px 13px;font-size:14.5px;font-family:inherit;
+    border:1px solid var(--line);border-radius:2px;margin-bottom:16px;}
+  .login input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(11,58,102,.12);}
+  .login button{width:100%;padding:13px;background:var(--blue);color:#fff;border:0;
+    border-radius:2px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .login button:disabled{background:#8E9AA8;}
+
+  /* 統計 */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);margin-bottom:22px;}
+  .stats div{background:#fff;padding:16px 18px;}
+  .stats b{display:block;font-family:"Archivo";font-size:25px;font-weight:600;line-height:1.2;}
+  .stats small{font-size:12px;color:var(--soft);font-weight:300;}
+  .stats div.hi b{color:var(--amber);}
+
+  /* 工具列 */
+  .tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+  .tools input[type=search], .tools select{padding:9px 12px;font-size:13.5px;font-family:inherit;
+    border:1px solid var(--line);border-radius:2px;background:#fff;}
+  .tools input[type=search]{min-width:230px;}
+  .tools .spacer{flex:1;}
+  .tools .out{padding:9px 16px;background:var(--ink);color:#fff;border:0;border-radius:2px;
+    font-size:13.5px;font-family:inherit;cursor:pointer;font-weight:500;}
+
+  /* 表格 */
+  .tablewrap{background:#fff;border:1px solid var(--line);overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:1020px;}
+  th{background:#EEF1F4;text-align:left;padding:11px 14px;font-weight:700;
+    font-size:12.5px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  td{padding:12px 14px;border-bottom:1px solid #EDEFF2;vertical-align:top;}
+  tr:last-child td{border-bottom:0;}
+  tr.row:hover{background:#F8FAFC;}
+  td.co{font-weight:500;}
+  td .sub{font-size:12px;color:var(--soft);font-weight:300;}
+  td.when{white-space:nowrap;font-size:12.5px;color:var(--soft);}
+  .tags{display:flex;flex-wrap:wrap;gap:4px;}
+  .tag{font-size:11px;padding:2px 7px;background:#EEF3F8;color:var(--blue);border-radius:2px;white-space:nowrap;}
+  td.need{max-width:300px;font-size:12.5px;color:var(--soft);font-weight:300;}
+  select.st{padding:5px 8px;font-size:12.5px;font-family:inherit;border:1px solid var(--line);
+    border-radius:2px;background:#fff;cursor:pointer;}
+  select.st[data-v=new]{border-color:var(--amber);background:#FFF8EC;font-weight:500;}
+  select.st[data-v=done]{border-color:var(--ok);background:#F0F8F3;color:var(--ok);}
+  select.st[data-v=drop]{color:var(--soft);background:#F4F5F7;}
+
+  .empty{padding:60px 20px;text-align:center;color:var(--soft);font-weight:300;}
+  .msg{padding:11px 14px;margin-bottom:16px;font-size:13.5px;border-left:3px solid var(--err);
+    background:#FDF6F5;color:var(--err);display:none;}
+  .msg.on{display:block;}
+  #app{display:none;}
+  @media(max-width:760px){.stats{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <b>實威國際 · 預約名單</b>
+  <div class="who" id="who" style="display:none;">
+    <span id="mail"></span>
+    <button id="out">登出</button>
+  </div>
+</div>
+
+<section class="login" id="login">
+  <h1>登入查看</h1>
+  <p class="l">使用公司內部帳號登入。</p>
+  <div class="msg" id="lerr"></div>
+  <label for="em">電子信箱</label>
+  <input type="email" id="em" autocomplete="username">
+  <label for="pw">密碼</label>
+  <input type="password" id="pw" autocomplete="current-password">
+  <button id="in">登入</button>
+</section>
+
+<main class="wrap" id="app">
+  <div class="msg" id="derr"></div>
+
+  <div class="stats">
+    <div class="hi"><b id="s-new">—</b><small>待聯繫</small></div>
+    <div><b id="s-doing">—</b><small>聯繫中</small></div>
+    <div><b id="s-done">—</b><small>已完成</small></div>
+    <div><b id="s-all">—</b><small>總計</small></div>
+  </div>
+
+  <div class="tools">
+    <input type="search" id="q" placeholder="搜尋公司、姓名、電話、信箱">
+    <select id="fs">
+      <option value="">全部狀態</option>
+      <option value="new">待聯繫</option>
+      <option value="doing">聯繫中</option>
+      <option value="done">已完成</option>
+      <option value="drop">未成案</option>
+    </select>
+    <select id="fi">
+      <option value="">全部設備</option>
+      <option>SIMSCAN</option>
+      <option>NimbleTrack</option>
+      <option>Geomagic Control X</option>
+      <option>Formlabs 列印</option>
+    </select>
+    <div class="spacer"></div>
+    <button class="out" id="csv">匯出 CSV</button>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>送出時間</th><th>公司 / 聯絡人</th><th>聯絡方式</th>
+          <th>想體驗</th><th>產業</th><th>需求說明</th><th>帶件</th><th>時段</th><th>狀態</th>
+        </tr>
+      </thead>
+      <tbody id="tb"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none;">目前沒有符合條件的預約。</div>
+  </div>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyBhgfPGUgGsWr4VmOUeaEe_cC0RNSx8I7U",
+  authDomain:        "swtc-portal-6930c.firebaseapp.com",
+  projectId:         "swtc-portal-6930c",
+  storageBucket:     "swtc-portal-6930c.firebasestorage.app",
+  messagingSenderId: "447508396321",
+  appId:             "1:447508396321:web:ee8d1faaa0331590e5e660"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+const LABEL = { new:"待聯繫", doing:"聯繫中", done:"已完成", drop:"未成案" };
+
+let rows = [];
+
+/* ---------- 登入 ---------- */
+$("in").addEventListener("click", async () => {
+  $("lerr").classList.remove("on");
+  $("in").disabled = true; $("in").textContent = "登入中…";
+  try {
+    await signInWithEmailAndPassword(auth, $("em").value.trim(), $("pw").value);
+  } catch (e) {
+    $("lerr").textContent = "登入失敗，請確認信箱與密碼是否正確。";
+    $("lerr").classList.add("on");
+  }
+  $("in").disabled = false; $("in").textContent = "登入";
+});
+$("pw").addEventListener("keydown", e => { if (e.key === "Enter") $("in").click(); });
+$("out").addEventListener("click", () => signOut(auth));
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    $("login").style.display = "none";
+    $("app").style.display = "block";
+    $("who").style.display = "flex";
+    $("mail").textContent = user.email;
+    listen();
+  } else {
+    $("login").style.display = "block";
+    $("app").style.display = "none";
+    $("who").style.display = "none";
+  }
+});
+
+/* ---------- 讀取資料 ---------- */
+function listen(){
+  const q = query(collection(db, "demo_requests"), orderBy("createdAt", "desc"));
+  onSnapshot(q,
+    snap => {
+      rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      render();
+    },
+    err => {
+      console.error(err);
+      $("derr").textContent = "讀取失敗：你的帳號可能沒有查看權限（需要 view_board 或 admin）。";
+      $("derr").classList.add("on");
+    }
+  );
+}
+
+/* ---------- 渲染 ---------- */
+const fmt = ts => {
+  if (!ts?.toDate) return "—";
+  const d = ts.toDate();
+  const p = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}<br><span class="sub">${p(d.getHours())}:${p(d.getMinutes())}</span>`;
+};
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function filtered(){
+  const kw = $("q").value.trim().toLowerCase();
+  const fs = $("fs").value, fi = $("fi").value;
+  return rows.filter(r => {
+    if (fs && (r.status || "new") !== fs) return false;
+    if (fi && !(r.interest || []).includes(fi)) return false;
+    if (kw) {
+      const hay = [r.company, r.name, r.phone, r.email, r.need].join(" ").toLowerCase();
+      if (!hay.includes(kw)) return false;
+    }
+    return true;
+  });
+}
+
+function render(){
+  const list = filtered();
+
+  const c = s => rows.filter(r => (r.status || "new") === s).length;
+  $("s-new").textContent   = c("new");
+  $("s-doing").textContent = c("doing");
+  $("s-done").textContent  = c("done");
+  $("s-all").textContent   = rows.length;
+
+  $("empty").style.display = list.length ? "none" : "block";
+
+  $("tb").innerHTML = list.map(r => {
+    const st = r.status || "new";
+    const opts = Object.entries(LABEL)
+      .map(([v,t]) => `<option value="${v}"${v===st?" selected":""}>${t}</option>`).join("");
+    const tags = (r.interest || []).map(i => `<span class="tag">${esc(i)}</span>`).join("");
+    return `<tr class="row">
+      <td class="when">${fmt(r.createdAt)}</td>
+      <td class="co">${esc(r.company)}<div class="sub">${esc(r.name)}${r.title ? " · " + esc(r.title) : ""}</div></td>
+      <td>${esc(r.phone)}<div class="sub">${esc(r.email)}</div></td>
+      <td><div class="tags">${tags}</div></td>
+      <td>${esc(r.industry) || "—"}</td>
+      <td class="need">${esc(r.need) || "—"}</td>
+      <td>${esc(r.bring) || "—"}</td>
+      <td>${esc(r.when) || "—"}</td>
+      <td><select class="st" data-id="${r.id}" data-v="${st}">${opts}</select></td>
+    </tr>`;
+  }).join("");
+
+  document.querySelectorAll("select.st").forEach(sel => {
+    sel.addEventListener("change", async e => {
+      const v = e.target.value;
+      e.target.dataset.v = v;
+      try {
+        await updateDoc(doc(db, "demo_requests", e.target.dataset.id), { status: v });
+      } catch (err) {
+        console.error(err);
+        $("derr").textContent = "狀態更新失敗：可能沒有編輯權限。";
+        $("derr").classList.add("on");
+      }
+    });
+  });
+}
+
+["q","fs","fi"].forEach(id => $(id).addEventListener("input", render));
+
+/* ---------- 匯出 ---------- */
+$("csv").addEventListener("click", () => {
+  const head = ["送出時間","公司","聯絡人","職稱","電話","信箱","想體驗","產業","需求說明","帶件","時段","狀態"];
+  const q = s => `"${String(s ?? "").replace(/"/g,'""')}"`;
+  const lines = filtered().map(r => [
+    r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString("zh-TW") : "",
+    r.company, r.name, r.title, r.phone, r.email,
+    (r.interest||[]).join(" / "), r.industry, r.need, r.bring, r.when,
+    LABEL[r.status || "new"]
+  ].map(q).join(","));
+
+  const blob = new Blob(["\uFEFF" + [head.map(q).join(","), ...lines].join("\r\n")],
+                        { type:"text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `預約名單_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>
