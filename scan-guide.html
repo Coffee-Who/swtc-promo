@@ -2080,7 +2080,9 @@ document.addEventListener('keydown',function(e){var t=e.target.closest&&e.target
   else if(e.key==='Home'){go('home')}});
 var wLock=0;function wheelHint(m){var h=$('wheelHint');h.textContent=m;h.classList.add('on');clearTimeout(h._t);h._t=setTimeout(function(){h.classList.remove('on')},900)}
 document.addEventListener('wheel',function(e){if(window.innerWidth<=1000||!$('welcome').classList.contains('off'))return;if(e.target.closest('.rail'))return;
-  var sc=e.target.closest('.scroll,.prod-r');while(sc&&!(sc.scrollHeight>sc.clientHeight+2)){sc=sc.parentElement&&sc.parentElement.closest('.scroll,.prod-r')}if(sc){var atTop=sc.scrollTop<=0,atBot=sc.scrollTop+sc.clientHeight>=sc.scrollHeight-2;if((e.deltaY>0&&!atBot)||(e.deltaY<0&&!atTop))return}
+  var tp=document.querySelector('.topic:not([hidden])');var scs=tp?[].slice.call(tp.querySelectorAll('.scroll,.prod-r')).filter(function(x){return x.scrollHeight>x.clientHeight+2}):[];
+  if(scs.length){var sc=e.target.closest&&e.target.closest('.scroll,.prod-r');if(!sc||scs.indexOf(sc)<0)sc=scs[0];var atBot=sc.scrollTop+sc.clientHeight>=sc.scrollHeight-2;
+    if(e.deltaY>0&&atBot&&Math.abs(e.deltaY)>=14){var nw=Date.now();if(nw-wLock>1200){wLock=nw;wheelHint('已到本頁底部，按右下角「下一頁」繼續')}}return}
   if(Math.abs(e.deltaY)<14)return;var now=Date.now();if(now-wLock<750)return;wLock=now;
   var i=ORDER.findIndex(function(o){return o[0]===cur}),k=i+(e.deltaY>0?1:-1);if(k<0||k>=ORDER.length){wheelHint(k<0?'已是第一頁':'已是最後一頁');return}go(ORDER[k][0])},{passive:true});
 function wlClose(to){$('welcome').classList.add('off');go(to||cur)}
